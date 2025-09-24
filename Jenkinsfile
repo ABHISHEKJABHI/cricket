@@ -8,7 +8,7 @@ pipeline {
    
          environment {
         // Centralized environment variables
-        DOCKER_REGISTRY = "index.docker.io/v1/"
+        DOCKER_REGISTRY = "docker.io" 
         DOCKER_USERNAME = "abhishek7483"
         DOCKER_IMAGE_NAME = "cricket"
         GIT_REPO = "https://github.com/ABHISHEKJABHI/cricket.git"
