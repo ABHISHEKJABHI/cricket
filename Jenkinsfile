@@ -5,7 +5,17 @@ pipeline {
             args '-v /tmp:/tmp -p 8080:8080'
         }
     }
-    stages {
+   
+         environment {
+        // Centralized environment variables
+        DOCKER_REGISTRY = "index.docker.io/v1/"
+        DOCKER_USERNAME = "abhishek7483"
+        DOCKER_IMAGE_NAME = "cricket"
+        GIT_REPO = "https://github.com/ABHISHEKJABHI/cricket.git"
+        SONAR_URL = "http://localhost:9000"
+    }
+      
+      stages {
         stage('Setup Maven') {
             steps {
                 sh '''
@@ -17,17 +27,7 @@ pipeline {
         }
         // ... rest of your stages
     }
-  
-    environment {
-        // Centralized environment variables
-        DOCKER_REGISTRY = "index.docker.io/v1/"
-        DOCKER_USERNAME = "abhishek7483"
-        DOCKER_IMAGE_NAME = "cricket"
-        GIT_REPO = "https://github.com/ABHISHEKJABHI/cricket.git"
-        SONAR_URL = "http://localhost:9000"
-    }
     
-    stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', 
