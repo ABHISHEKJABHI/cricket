@@ -2,8 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.6-eclipse-temurin-21'
-            // ✅ Mount persistent .m2 cache so Maven can download dependencies
-            args '-v /tmp:/tmp -v /var/lib/jenkins/.m2:/root/.m2'
+            args '-v /tmp:/tmp'
         }
     }
 
@@ -12,6 +11,7 @@ pipeline {
         DOCKER_IMAGE_NAME = "cricket"
         GIT_REPO          = "https://github.com/ABHISHEKJABHI/cricket.git"
         SONAR_URL         = "http://localhost:9000"
+        MAVEN_REPO_LOCAL  = "/tmp/.m2/repository"   // ✅ Writable inside container
     }
 
     stages {
@@ -33,12 +33,10 @@ pipeline {
 
         stage('Build') {
             steps {
-                // ✅ Force Maven to use mounted repo
-                sh 'mvn clean package -DskipTests -Dmaven.repo.local=/root/.m2/repository'
+                sh "mvn clean package -DskipTests -Dmaven.repo.local=${MAVEN_REPO_LOCAL}"
 
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
 
-                // Save the built JAR for Docker stage
                 sh 'cp target/*.jar ./app.jar'
                 stash name: 'app-jar', includes: 'app.jar'
             }
@@ -52,19 +50,19 @@ pipeline {
                 withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
                     sh """
                         mvn sonar:sonar \
+                        -Dmaven.repo.local=${MAVEN_REPO_LOCAL} \
                         -Dsonar.login=$SONAR_AUTH_TOKEN \
                         -Dsonar.host.url=${SONAR_URL} \
                         -Dsonar.projectKey=cricket-game \
                         -Dsonar.projectName='Cricket Game' \
-                        -Dsonar.java.binaries=target/classes \
-                        -Dmaven.repo.local=/root/.m2/repository
+                        -Dsonar.java.binaries=target/classes
                     """
                 }
             }
         }
 
         stage('Build Docker Image') {
-            agent any  // ✅ Run on Jenkins host (Docker installed here)
+            agent any
             environment {
                 DOCKER_IMAGE_TAG = "${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
             }
@@ -72,7 +70,6 @@ pipeline {
                 unstash 'app-jar'
 
                 script {
-                    // ✅ Create Dockerfile dynamically
                     writeFile file: 'Dockerfile', text: '''
                     FROM eclipse-temurin:21-jre
                     WORKDIR /app
@@ -81,7 +78,6 @@ pipeline {
                     ENTRYPOINT ["java", "-jar", "app.jar"]
                     '''
 
-                    // Build Docker image
                     docker.build("${DOCKER_IMAGE_TAG}", ".")
                 }
             }
