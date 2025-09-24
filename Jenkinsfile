@@ -1,10 +1,5 @@
 pipeline {
-      agent {
-        docker {
-            image 'openjdk:21-jdk'  // This usually works
-            args '-v /tmp:/tmp -p 8080:8080'
-        }
-    }
+      agent any
    
          environment {
         // Centralized environment variables
