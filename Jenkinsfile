@@ -9,6 +9,7 @@ pipeline {
         // Set DOCKER_IMAGE_TAG globally to avoid MissingPropertyException
         DOCKER_IMAGE_TAG  = "${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
     }
+    tools { maven 'mvn' }
 
     stages {
         stage('Checkout') {
