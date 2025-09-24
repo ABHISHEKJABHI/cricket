@@ -1,11 +1,23 @@
 pipeline {
-    agent {
+      agent {
         docker {
-            image 'maven:3.9.6-eclipse-temurin-21-alpine'  // ✅ FIXED
+            image 'openjdk:21-jdk'  // This usually works
             args '-v /tmp:/tmp -p 8080:8080'
         }
     }
-    
+    stages {
+        stage('Setup Maven') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y maven
+                    mvn --version
+                '''
+            }
+        }
+        // ... rest of your stages
+    }
+  
     environment {
         // Centralized environment variables
         DOCKER_REGISTRY = "index.docker.io/v1/"
