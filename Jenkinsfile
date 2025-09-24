@@ -1,7 +1,7 @@
 pipeline {
    agent {
         docker {
-            image 'maven:3.8.1-openjdk-21'
+            image 'maven:3.9.6-openjdk-21'
             args '-v /tmp:/tmp -p 8080:8080'
         }
     }
