@@ -9,7 +9,7 @@ pipeline {
     }
       tools {
         maven 'mvn'
-        jdk 'jdk11'  // Added JDK tool
+      
     }
 
     stages {
