@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'maven:3.9.3-eclipse-temurin-21'  // Maven + OpenJDK 21
+            image 'maven:3.9.3-openjdk-21-slim'  // Maven + OpenJDK 21
             args '-v $HOME/.m2:/root/.m2'   // Optional: cache Maven dependencies
         }
     }
