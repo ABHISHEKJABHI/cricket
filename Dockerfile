@@ -1,8 +1,8 @@
 FROM alpine:3.18
 
-# Install OpenJDK 21 on Alpine
+# Install OpenJDK 17 (available in Alpine repositories)
 RUN apk update && \
-    apk add openjdk21-jre
+    apk add openjdk17-jre
 
 WORKDIR /app
 COPY app.jar app.jar
