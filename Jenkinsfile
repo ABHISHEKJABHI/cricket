@@ -1,5 +1,5 @@
 pipeline {
-    agent any   // ✅ Run on Jenkins host (not Docker agent mode)
+    agent any   // ✅ Runs entirely on Jenkins host
 
     environment {
         DOCKER_USERNAME   = "abhishek7483"
@@ -17,13 +17,7 @@ pipeline {
 
         stage('Build with Maven') {
             steps {
-                script {
-                    // ✅ Run Maven inside a container, but not pipeline agent
-                    docker.image('maven:3.9.6-eclipse-temurin-21').inside('-v /tmp:/tmp') {
-                        sh 'mvn clean package -DskipTests'
-                    }
-                }
-
+                sh 'mvn clean package -DskipTests'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 sh 'cp target/*.jar ./app.jar'
                 stash name: 'app-jar', includes: 'app.jar'
@@ -32,19 +26,15 @@ pipeline {
 
         stage('Static Code Analysis') {
             steps {
-                script {
-                    docker.image('maven:3.9.6-eclipse-temurin-21').inside('-v /tmp:/tmp') {
-                        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                            sh """
-                                mvn sonar:sonar \
-                                -Dsonar.login=$SONAR_AUTH_TOKEN \
-                                -Dsonar.host.url=${SONAR_URL} \
-                                -Dsonar.projectKey=cricket-game \
-                                -Dsonar.projectName='Cricket Game' \
-                                -Dsonar.java.binaries=target/classes
-                            """
-                        }
-                    }
+                withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh """
+                        mvn sonar:sonar \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN \
+                        -Dsonar.host.url=${SONAR_URL} \
+                        -Dsonar.projectKey=cricket-game \
+                        -Dsonar.projectName='Cricket Game' \
+                        -Dsonar.java.binaries=target/classes
+                    """
                 }
             }
         }
