@@ -7,6 +7,10 @@ pipeline {
         GIT_REPO          = "https://github.com/ABHISHEKJABHI/cricket.git"
         SONAR_URL         = "http://localhost:9000"
     }
+      tools {
+        maven 'mvn'
+        jdk 'jdk11'  // Added JDK tool
+    }
 
     stages {
         stage('Checkout') {
