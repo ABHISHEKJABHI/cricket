@@ -35,8 +35,8 @@ pipeline {
                         mvn sonar:sonar \
                         -Dsonar.login=$SONAR_AUTH_TOKEN \
                         -Dsonar.host.url=${SONAR_URL} \
-                        -Dsonar.projectKey=cricket-game \
-                        -Dsonar.projectName='Cricket Game' \
+                         -Dsonar.projectKey=cricket-scan \
+                         -Dsonar.projectName='cricket-scan' \
                         -Dsonar.java.binaries=target/classes
                     """
                 }
