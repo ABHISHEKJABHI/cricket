@@ -1,15 +1,18 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9.3-openjdk-21'  // Maven + OpenJDK 21
+            args '-v $HOME/.m2:/root/.m2'   // Optional: cache Maven dependencies
+        }
+    }
 
     environment {
         DOCKER_USERNAME   = "abhishek7483"
         DOCKER_IMAGE_NAME = "cricket"
         GIT_REPO          = "https://github.com/ABHISHEKJABHI/cricket.git"
         SONAR_URL         = "http://localhost:9000"
-    }
-    
-    tools {
-        maven 'mvn'
+        // Set DOCKER_IMAGE_TAG globally to avoid MissingPropertyException
+        DOCKER_IMAGE_TAG  = "${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
     }
 
     stages {
@@ -23,7 +26,6 @@ pipeline {
             steps {
                 sh 'mvn clean package -DskipTests'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                // Stash the JAR file from target directory
                 stash name: 'app-jar', includes: 'target/*.jar'
             }
         }
@@ -44,13 +46,9 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            environment {
-                DOCKER_IMAGE_TAG = "${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
-            }
             steps {
                 unstash 'app-jar'
                 sh """
-                    # Rename the JAR file from target directory to app.jar in current directory
                     mv target/*.jar app.jar
                     docker build -t ${DOCKER_IMAGE_TAG} .
                 """
@@ -59,19 +57,17 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    withCredentials([usernamePassword(
-                        credentialsId: 'abhishek7483',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )]) {
-                        sh """
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push ${DOCKER_IMAGE_TAG}
-                            docker tag ${DOCKER_IMAGE_TAG} ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-                            docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-                        """
-                    }
+                withCredentials([usernamePassword(
+                    credentialsId: 'abhishek7483',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${DOCKER_IMAGE_TAG}
+                        docker tag ${DOCKER_IMAGE_TAG} ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+                        docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+                    """
                 }
             }
         }
