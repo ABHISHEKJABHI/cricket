@@ -1,9 +1,8 @@
 pipeline {
    agent {
       docker {
-        image 'maven:3.9.6-openjdk-22'
-        args '-v /tmp:/tmp -p 8080:8080'
-        label 'docker'
+          image 'maven:3.8.8-openjdk-21' 
+           args '-v /tmp:/tmp -p 8080:8080'
     }
 }
     environment {
