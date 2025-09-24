@@ -71,7 +71,7 @@ pipeline {
                     // Create Dockerfile if it doesn't exist
                     sh '''
                     cat > Dockerfile << EOF
-FROM openjdk:11-jre-slim
+FROM openjdk:21-jre-slim
 WORKDIR /app
 COPY target/*.jar app.jar
 EXPOSE 8080
