@@ -1,10 +1,11 @@
 pipeline {
    agent {
-        docker {
-            image 'maven:3.9.6-openjdk-21'
-            args '-v /tmp:/tmp -p 8080:8080'
-        }
+      docker {
+        image 'maven:3.9.6-openjdk-22'
+        args '-v /tmp:/tmp -p 8080:8080'
+        label 'docker'
     }
+}
     environment {
         // Centralized environment variables
         DOCKER_REGISTRY = "index.docker.io/v1/"
