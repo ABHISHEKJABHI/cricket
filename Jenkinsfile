@@ -43,48 +43,34 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            environment {
-                DOCKER_IMAGE_TAG = "${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
-            }
-            steps {
-                unstash 'app-jar'
-                script {
-                    writeFile file: 'Dockerfile', text: '''
-                    FROM eclipse-temurin:21-jre
-                    WORKDIR /app
-                    COPY app.jar app.jar
-                    EXPOSE 8080
-                    ENTRYPOINT ["java", "-jar", "app.jar"]
-                    '''
-                    sh "docker build -t ${DOCKER_IMAGE_TAG} ."
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(
-                        credentialsId: 'dockerhub',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )]) {
-                        sh """
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}
-                            docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-                            docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-                        """
-                    }
-                }
-            }
-        }
+       stage('Build Docker Image') {
+    environment {
+        DOCKER_IMAGE_TAG = "${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
     }
+    steps {
+        unstash 'app-jar'
+        sh """
+            git clone https://github.com/ABHISHEKJABHI/cricket.git .
+            docker build -t ${DOCKER_IMAGE_TAG} .
+        """
+    }
+}
 
-    post {
-        always {
-            cleanWs()
+stage('Push Docker Image') {
+    steps {
+        script {
+            withCredentials([usernamePassword(
+                credentialsId: 'dockerhub',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )]) {
+                sh """
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}
+                    docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+                    docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+                """
+            }
         }
     }
 }
