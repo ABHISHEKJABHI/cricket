@@ -1,5 +1,5 @@
 pipeline {
-    agent any   // ✅ Runs entirely on Jenkins host
+    agent any
 
     environment {
         DOCKER_USERNAME   = "abhishek7483"
@@ -23,7 +23,8 @@ pipeline {
             steps {
                 sh 'mvn clean package -DskipTests'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                stash name: 'app-jar', includes: 'app.jar'
+                // Stash the JAR file from target directory
+                stash name: 'app-jar', includes: 'target/*.jar'
             }
         }
 
@@ -49,8 +50,8 @@ pipeline {
             steps {
                 unstash 'app-jar'
                 sh """
-                    # Copy the JAR file to current directory (Dockerfile is already here from checkout)
-                    cp app.jar .
+                    # Rename the JAR file from target directory to app.jar in current directory
+                    mv target/*.jar app.jar
                     docker build -t ${DOCKER_IMAGE_TAG} .
                 """
             }
