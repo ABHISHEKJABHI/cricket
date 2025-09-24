@@ -1,7 +1,11 @@
 pipeline {
-      agent any
-   
-         environment {
+          agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-21'  
+            args '-v /tmp:/tmp -p 8080:8080'
+        }
+    }
+       environment {
         // Centralized environment variables
         DOCKER_REGISTRY = "docker.io" 
         DOCKER_USERNAME = "abhishek7483"
@@ -9,17 +13,6 @@ pipeline {
         GIT_REPO = "https://github.com/ABHISHEKJABHI/cricket.git"
         SONAR_URL = "http://localhost:9000"
     }
-      
-      stages {
-        stage('Setup Maven') {
-            steps {
-                sh '''
-                    apt-get update
-                    apt-get install -y maven
-                    mvn --version
-                '''
-            }
-        }
     
         stage('Checkout') {
             steps {
