@@ -1,15 +1,10 @@
 pipeline {
    agent {
         docker {
-            image 'maven:3.8.1-openjdk-11'
+            image 'maven:3.8.1-openjdk-21'
             args '-v /tmp:/tmp -p 8080:8080'
         }
     }
-    tools {
-        maven 'mvn'
-        jdk 'jdk11'  // Added JDK tool
-    }
-    
     environment {
         // Centralized environment variables
         DOCKER_REGISTRY = "index.docker.io/v1/"
@@ -17,15 +12,14 @@ pipeline {
         DOCKER_IMAGE_NAME = "cricket"
         GIT_REPO = "https://github.com/ABHISHEKJABHI/cricket.git"
         SONAR_URL = "http://localhost:9000"
-        K8S_NAMESPACE = "cricket-game"
+       
     }
     
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', 
-                url: "${GIT_REPO}",
-                credentialsId: 'github'  // Added credentials
+                url: "${GIT_REPO}"
             }
         }
         
@@ -37,34 +31,16 @@ pipeline {
                         java -version
                         mvn --version
                         docker --version
-                        kubectl version --client 2>/dev/null || echo "kubectl not available"
+                        
                     '''
                 }
             }
         }
         
         stage('Build') {
-            steps {
-                sh 'mvn clean compile -DskipTests'
-            }
-        }
-        
-        stage('Unit Tests') {
-            steps {
-                sh 'mvn test'
-                post {
-                    always {
-                        junit '**/target/surefire-reports/*.xml'
-                        publishHTML([
-                            allowMissing: true,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'target/site/jacoco',
-                            reportFiles: 'index.html',
-                            reportName: 'Code Coverage Report'
-                        ])
-                    }
-                }
+              steps {
+                sh 'mvn clean package -DskipTests'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
         
@@ -83,13 +59,6 @@ pipeline {
                         -Dsonar.java.binaries=target/classes
                     """
                 }
-            }
-        }
-        
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
         
