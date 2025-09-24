@@ -1,10 +1,11 @@
 pipeline {
-   agent {
-      docker {
-          image 'maven:3-eclipse-temurin-21-alpine⁠' 
-           args '-v /tmp:/tmp -p 8080:8080'
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-21-alpine'  // ✅ FIXED
+            args '-v /tmp:/tmp -p 8080:8080'
+        }
     }
-}
+    
     environment {
         // Centralized environment variables
         DOCKER_REGISTRY = "index.docker.io/v1/"
@@ -12,7 +13,6 @@ pipeline {
         DOCKER_IMAGE_NAME = "cricket"
         GIT_REPO = "https://github.com/ABHISHEKJABHI/cricket.git"
         SONAR_URL = "http://localhost:9000"
-       
     }
     
     stages {
@@ -31,14 +31,13 @@ pipeline {
                         java -version
                         mvn --version
                         docker --version
-                        
                     '''
                 }
             }
         }
         
         stage('Build') {
-              steps {
+            steps {
                 sh 'mvn clean package -DskipTests'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
@@ -107,6 +106,5 @@ EOF
                 }
             }
         }
-    }  
+    }
 }
-        
