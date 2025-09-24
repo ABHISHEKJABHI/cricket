@@ -14,7 +14,8 @@ pipeline {
         SONAR_URL = "http://localhost:9000"
     }
     
-        stage('Checkout') {
+       stages{
+                 stage('Checkout') {
             steps {
                 git branch: 'main', 
                 url: "${GIT_REPO}"
@@ -105,4 +106,4 @@ EOF
             }
         }
     }
-
+}
