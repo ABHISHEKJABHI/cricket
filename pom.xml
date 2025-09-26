@@ -5,28 +5,77 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
+    <!-- Spring Boot Parent (Recommended for Spring Boot apps) --> 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.0</version>
+        <relativePath/>
+    </parent>
+    
     <groupId>com.cricketgame</groupId>
     <artifactId>cricket-game</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
     
+    <name>Cricket Game Application</name>
+    <description>A cricket game application built with Spring Boot</description>
+    
     <properties>
+        <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     
     <dependencies>
+        <!-- Spring Boot Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        
+        <!-- Spring Boot Starter Web (if you need web functionality) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <!-- Spring Boot Starter Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- JUnit Jupiter -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
     
     <build>
         <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.cricketgame.CricketGame</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -36,6 +85,8 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            
+            <!-- Maven Surefire Plugin (for tests) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -44,23 +95,3 @@
         </plugins>
     </build>
 </project>
-<project>
-    <!-- ... other configurations ... -->
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.cricketgame.CricketGame</mainClass>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            
-          
